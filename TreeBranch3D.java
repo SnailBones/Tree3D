@@ -26,7 +26,7 @@ public class TreeBranch3D {
 		//angle = a;
 		rotation = new RotationMatrix(3,3);
 		color = c;
-		this.makeTip(1);
+		tip = rotation.multiply(new Point3D(0, -size, 0));
 	}
 	
 	public TreeBranch3D(Point3D p, double s, RotationMatrix a, Color c) {
@@ -51,12 +51,12 @@ public class TreeBranch3D {
 //		//rotation = new RotationMatrix(3,3);
 //		return rotation;
 //	}
-	public void makeTip(double levity) {
+	public void rotateTip(Point3D goal, double levity) {
 		//levity = .5;
 		if (levity > 0){
 			Point3D tip = new Point3D(0, -size, 0);
 			Point3D rtip = rotation.multiply(tip);
-			RotationMatrix followLight = RotationMatrix.rotateToward(rtip, tip, levity);
+			RotationMatrix followLight = RotationMatrix.rotateToward(rtip, goal, levity);
 			//rotation = rotation.multiply(followLight);
 			rotation = followLight.multiply(rotation);
 			Point3D ltip = rotation.multiply(tip);
@@ -64,7 +64,7 @@ public class TreeBranch3D {
 		}
 		else if (levity < 0) {
 			Point3D tip = new Point3D(0, -size, 0);
-			Point3D goal = new Point3D(0, size, 0);
+			goal = new Point3D(-goal.getX(), -goal.getY(), -goal.getZ());
 			Point3D rtip = rotation.multiply(tip);
 			RotationMatrix followLight = RotationMatrix.rotateToward(rtip, goal, -levity);
 			//rotation = rotation.multiply(followLight);
@@ -83,7 +83,7 @@ public class TreeBranch3D {
 		return root.add(tip);
 	}
 	
-	private Point3D rotateAroundY(Point3D p3d, double sin_a, double cos_a){
+	public static Point3D rotateAroundY(Point3D p3d, double sin_a, double cos_a){
 		 double y = p3d.getY();
 		 // from matrix for multiplication
 		 double x = sin_a*p3d.getX() - cos_a*p3d.getZ();
@@ -135,14 +135,14 @@ public class TreeBranch3D {
 //		}
 //		else {
 //			g2d.draw(new Line2D.Double(r_tip.getX(), r_tip.getY(), r_root.getX(), r_root.getY()));
-//		}
+//		}rand
 		for (TreeBranch3D baby: babies) {
 			if (baby != null)
 				baby.drawMe(g2d, sin_a, cos_a, size);
 		}
 	}
 	
-	public TreeBranch3D makeBaby(TreeData3D rules) {
+	public TreeBranch3D makeBaby(TreeData3D rules, Point3D goal) {
 
 		// stop growing if less than threshold
 		if (size < rules.min_size) {
@@ -155,7 +155,7 @@ public class TreeBranch3D {
 		RotationMatrix new_rotation = rotation.multiply(rules.getMatrix());
 		
 		TreeBranch3D baby = new TreeBranch3D(getTip(), size, new_rotation,  wiggleColor(color, rules.color_warp));
-		baby.makeTip(rules.grow_lean);
+		baby.rotateTip(goal, rules.grow_lean);
 		babies.add(baby);
 
 		return baby;

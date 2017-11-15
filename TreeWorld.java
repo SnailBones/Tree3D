@@ -39,7 +39,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     Color colorAxis = Color.red;
     Color rootColor = Color.lightGray;
     TreeBranch3D tree;
-    double controlSize = 1.0;
+    double controlSize = 1;
     double rootSize;
     ArrayList <TreeBranch3D> activeBranches = new ArrayList <TreeBranch3D>();
     TreeData3D trunk_rules;
@@ -47,6 +47,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     TreeData3D trunk_tip_rules;
     TreeData3D branch_tip_rules;
     boolean enable_tip_rules = false;
+    Point3D goal = new Point3D(0,-1,0);
     
     double rotation; //camera angle
     
@@ -59,8 +60,6 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 	 {
     	trunk_tip_rules = trunk_rules = TreeData3D.DefaultTrunk();
     	branch_tip_rules = branch_rules = TreeData3D.DefaultBranch();
-    	trunk_rules.color_warp = 0;
-    	branch_rules.color_warp = 0;
 		setPreferredSize(new Dimension(900,900));
 		setBackground(Color.black);
 		//startTree();
@@ -80,7 +79,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 		//tree = new TreeBranch(0, 0, 100.0/average_size, -Math.PI/2);
     	tree = new TreeBranch3D(0, -100, 0, rootSize, rootColor);
 		activeBranches.add(tree);
-		rotation = 0;
+		//rotation = 0;
 		setTimer();
     }
     
@@ -100,12 +99,12 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     		TreeBranch3D baby_branch;
     		if (enable_tip_rules) {
         		double size = branch.size/rootSize;
-        		baby_trunk = branch.makeBaby(TreeData3D.blend(trunk_tip_rules, trunk_rules, size));
-        		baby_branch = branch.makeBaby(TreeData3D.blend(branch_tip_rules, branch_rules, size));
+        		baby_trunk = branch.makeBaby(TreeData3D.blend(trunk_tip_rules, trunk_rules, size), goal);
+        		baby_branch = branch.makeBaby(TreeData3D.blend(branch_tip_rules, branch_rules, size), goal);
     		}
     		else {	//use root rules for whole tree
-          		baby_trunk = branch.makeBaby(trunk_rules);
-        		baby_branch = branch.makeBaby(branch_rules);
+          		baby_trunk = branch.makeBaby(trunk_rules, goal);
+        		baby_branch = branch.makeBaby(branch_rules, goal);
     			
     		}
     		if (baby_trunk != null) {
@@ -129,29 +128,40 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     	}
     	repaint();
     }
+    
+    public void setMode(boolean rules) {
+    	enable_tip_rules = rules;
+//    	if (enable_tip_rules = false) {
+    		branch_tip_rules = branch_rules;
+    		trunk_tip_rules = trunk_rules;
+//    	}
+
+    }
    
-    public void setRules(TreeData3D rules, int branch_number, int end){
-    	if (end == 0)
-    	{
+    public void setRules(TreeData3D rules, int branch_number){
 	 		if (branch_number == 0)
 				{trunk_rules = rules;}
 			else
 				{branch_rules = rules;}
-    	}
-    	else {
+ 		startTree();
+    }
+    public void setRules(TreeData3D rules1, TreeData3D rules2, int branch_number){
 	 		if (branch_number == 0)
-				{trunk_tip_rules = rules;}
+				{trunk_rules = rules1;
+				trunk_tip_rules = rules2;}
 			else
-				{branch_tip_rules = rules;}
-    	}
+				{branch_rules = rules1;
+				branch_tip_rules = rules2;}
  		startTree();
     }
     
     public void randomizeRules(){
     	trunk_rules = TreeData3D.Random(trunk_rules.min_size, trunk_rules.color_warp);
-    	trunk_rules = TreeData3D.Random(branch_rules.min_size, branch_rules.color_warp);
-    	trunk_tip_rules = TreeData3D.Random(trunk_rules.min_size, trunk_rules.color_warp);
-    	branch_tip_rules = TreeData3D.Random(branch_rules.min_size, branch_rules.color_warp);
+    	branch_rules = TreeData3D.Random(branch_rules.min_size, branch_rules.color_warp);
+    	if (enable_tip_rules) {
+        	trunk_tip_rules = TreeData3D.Random(trunk_rules.min_size, trunk_rules.color_warp);
+        	branch_tip_rules = TreeData3D.Random(branch_rules.min_size, branch_rules.color_warp);	
+    	}
  		startTree();
     }
     
@@ -185,24 +195,32 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     }
 	
 	public void saveToGIF(){
+			String name = "tree";
+			File saveFile;
+		    int n = 0;
+	    	do {
+	    		n++;
+	    		saveFile = new File(name + "_" + n +".gif");
+	    	}
+	    	while (saveFile.exists());
+			System.out.println("saving as: " + saveFile.getAbsolutePath());
 		  try{
 
-			 File output = new File("tree.gif");
-			 FileImageOutputStream outputstream = new FileImageOutputStream(output);
+			 FileImageOutputStream outputstream = new FileImageOutputStream(saveFile);
 
 		    GifSequenceWriter writer = new GifSequenceWriter( outputstream, BufferedImage.TYPE_INT_RGB, 1, true);
-		    System.out.println("saving to gif");
     	    for (int i = 0; i < 60; i++) {
     	    	rotate(Math.PI*2/60);
     	    	BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
     	  	    Graphics g = image.getGraphics();
     	  	    printAll(g);
     	  	    writer.writeToSequence(image);
-    	    	System.out.println("frame " + i);
+    	    	System.out.print(i + "-");
     	    }
 		    writer.close();
 		    outputstream.close();
-			System.out.println("saved to gif: " + output.getAbsolutePath());
+		    System.out.println();
+			System.out.println("saved to gif: " + saveFile.getAbsolutePath());
 		  }
 		  catch(Exception e){
 			  System.out.println("Oops!");
@@ -213,13 +231,18 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     
     
     public void saveImage(String image_path) {
+	    File saveFile = new File(image_path + ".png");
+	    int i = 0;
+    	while (saveFile.exists()) {
+    		saveFile = new File(image_path + i +".png");
+    		i++;
+    	}
     
 	    BufferedImage awtImage = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
 	    Graphics g = awtImage.getGraphics();
 	    printAll(g);
 		try {
 		    // retrieve image
-		    File saveFile = new File(image_path + ".png");
 		    ImageIO.write(awtImage, "png", saveFile);
 			System.out.println("Saving your image to " + (saveFile.getAbsolutePath()) );
 		} catch (IOException e) {
@@ -231,6 +254,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     //click to make a new graph
 	 public void mouseClicked(MouseEvent e)
 	 {
+		 goal = getWorldCoordinates(e.getX(), e.getY()); 
 		 startTree();
 	 }
 	 
@@ -253,10 +277,23 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 		rotation = (rotation + amount)%(Math.PI*2);
 		repaint();
 	}
+	
+	//get direction in 3space of mouse
+	public Point3D getWorldCoordinates(int xxx, int yyy) {
+		double x = -(double)xxx+getWidth()/2;
+		double y= (double)yyy-getHeight();;
+		System.out.println("2d coords: x:" + x + " y: " + y);
+		Point3D point = new Point3D(x, y, 0);
+		point = TreeBranch3D.rotateAroundY(point, Math.sin(-rotation), Math.cos(-rotation));
+		System.out.println("rotation is: " + rotation);
+		point.printPoint();
+		return point;
+	}
 	 
 	@Override
 	 public void mouseDragged(MouseEvent e) {
-		 rotate(.01);
+		goal = getWorldCoordinates(e.getX(), e.getY()); 
+		rotate(.01);
 	 }
 
 	@Override

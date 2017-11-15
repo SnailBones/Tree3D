@@ -127,7 +127,7 @@ public class TreeData3D {
 		
 		d.color_warp = (int)(d1.color_warp*(1-ratio) + d2.color_warp*ratio);
 		//d.min_size = (int)(d1.min_size*(1-ratio) + d2.min_size*ratio);
-		d.min_size = d1.min_size;
+		d.min_size = d2.min_size;
     	return d;
     	
     }
