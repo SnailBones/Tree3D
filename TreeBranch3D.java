@@ -2,22 +2,14 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
 
 public class TreeBranch3D {
-	Random rand = new Random();
 	Point3D root;
-	//double angle;//angle from up to down to up again. latitude.
-	//double direction = 0; // angle around branch vector. longitude.
+	Point3D tip;
 	RotationMatrix rotation;
 	double growth_size = 0;
 	double size;
-	Point3D tip;
-	//boolean side = false;
 	Color color;
 	ArrayList<TreeBranch3D> babies = new ArrayList<TreeBranch3D>();
 	
@@ -33,32 +25,15 @@ public class TreeBranch3D {
 	public TreeBranch3D(Point3D p, double s, RotationMatrix a, Color c) {
 		root = p;
 		size = s;
-		//angle = a;
 		rotation = a;
-		//a.print();
 		color = c;
-		//makeTip(.2);
 	}
 	
-//	public RotationMatrix getNewRotation(RotationMatrix r, double direction, double angle) {
-//		double pheta = direction;
-//		double radius = size * Math.sin(angle);
-//		double y = root.getY() - size * Math.cos(angle);
-//		double x = root.getX() + radius * Math.cos(pheta);
-//		double z = root.getZ() + radius * Math.sin(pheta);
-//		rotation = RotationMatrix.rotateY(direction).multiply(r);
-//		rotation = RotationMatrix.rotateX(angle).multiply(rotation);
-//		//rotation.multiply(RotationMatrix.rotateY(direction));
-//		//rotation = new RotationMatrix(3,3);
-//		return rotation;
-//	}
-	public Point3D rotateTip(Point3D goal, double levity) {
-		//levity = .5;
+	public Point3D rotateTip(Point3D goal, double levity) {	//set correct matrix and return tip
 		if (levity > 0){
 			Point3D tip = new Point3D(0, -size, 0);
 			Point3D rtip = rotation.multiply(tip);
 			RotationMatrix followLight = RotationMatrix.rotateToward(rtip, goal, levity);
-			//rotation = rotation.multiply(followLight);
 			rotation = followLight.multiply(rotation);
 			Point3D ltip = rotation.multiply(tip);
 			return ltip;
@@ -68,7 +43,6 @@ public class TreeBranch3D {
 			goal = new Point3D(-goal.getX(), -goal.getY(), -goal.getZ());
 			Point3D rtip = rotation.multiply(tip);
 			RotationMatrix followLight = RotationMatrix.rotateToward(rtip, goal, -levity);
-			//rotation = rotation.multiply(followLight);
 			rotation = followLight.multiply(rotation);
 			Point3D ltip = rotation.multiply(tip);
 			return ltip;
@@ -94,8 +68,6 @@ public class TreeBranch3D {
 		 // from matrix for multiplication
 		 double x = sin_a*p3d.getX() - cos_a*p3d.getZ();
 		 double z = cos_a*p3d.getX() + sin_a*p3d.getZ();
-//		 double x = Math.sin(camera_angle)*p3d.getX() - Math.cos(camera_angle)*p3d.getZ();
-//		 double z = Math.cos(camera_angle)*p3d.getX() + Math.sin(camera_angle)*p3d.getZ();
 		 return new Point3D(x, y, z);
 	}
 	
@@ -122,7 +94,6 @@ public class TreeBranch3D {
 		int red = Math.max(0, Math.min(color.getRed()-place_in_space, 255));
 		int green = Math.max(0, Math.min(color.getGreen()-place_in_space, 255));
 		int blue = Math.max(0, Math.min(color.getBlue()-place_in_space, 255));
-		//System.out.println("red, green, blue: " + red + " " + green +" "+ blue);
 		Color newColor = new Color(red, green, blue);
 //		g2d.setColor(Color.black);
 		//g2d.setStroke(new BasicStroke((int)(size/7)));
@@ -141,7 +112,7 @@ public class TreeBranch3D {
 //		}
 //		else {
 //			g2d.draw(new Line2D.Double(r_tip.getX(), r_tip.getY(), r_root.getX(), r_root.getY()));
-//		}rand
+//		}
 		for (TreeBranch3D baby: babies) {
 			if (baby != null)
 				baby.drawMe(g2d, sin_a, cos_a, size);
@@ -160,7 +131,7 @@ public class TreeBranch3D {
 		double size = this.size*rules.size;
 		RotationMatrix new_rotation = rotation.multiply(rules.getMatrix());
 		
-		TreeBranch3D baby = new TreeBranch3D(getTip(), size, new_rotation,  wiggleColor(color, rules.color_warp));
+		TreeBranch3D baby = new TreeBranch3D(getTip(), size, new_rotation,  TreeData3D.wiggleColor(color, rules.color_warp));
 		baby.tip = baby.rotateTip(goal, rules.grow_lean);
 		babies.add(baby);
 
@@ -176,30 +147,4 @@ public class TreeBranch3D {
 		return false;
 	}
 
-	double addAngle(double angle, double amount){
-		return (angle+amount)%(Math.PI/2);
-	}
-	
-	//angle can be between 0 and 2 pi
-   
-   private Color wiggleColor(Color color, int level){
-      int shake = level*2+1;
-      
-      int[] rgb = new int[] {color.getRed(), color.getGreen(), color.getBlue()};
-      //extra green
-      rgb[1]+=level;
-      rgb[0]+=level;
-      for (int i = 0; i<3; i++){
-            int new_color = rgb[i]+rand.nextInt(shake)-level;
-            if (new_color < 0){
-               new_color = 0;
-            }
-            else if (new_color >255){
-               new_color = 255;
-            }
-            rgb[i] = new_color;
-      }
-      color = new Color(rgb[0], rgb[1], rgb[2]);
-      return color;
-    }
 }

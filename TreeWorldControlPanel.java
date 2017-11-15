@@ -8,21 +8,17 @@ import javax.swing.event.*;
 class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeListener
  {
 	
-	//trunk or branch, root or twig
-	int branch_number = 1;
-	int end_number = 0;
-	
 	TreeWorld sCanvas;
 	TreeData3D myRules;
 	TreeData3D tipRules;
+	
 	boolean advancedMode = false;//use twice the sliders
+	int branch_number = 1;	//trunk or branch
 	
 	JPanel min_size_slider, angle_slider, angle_warp_slider, size_slider, size_warp_slider, grow_direction_slider;
 	JPanel start_size_slider, whorl_slider, whorl_warp_slider, color_warp_slider;
 	final JColorChooser colorChooser;
 	JPanel sliders;
-	static double eye_size = 1;
-	static double nose_size = 1;
 	JButton b1;
 	JButton b2;
 	JButton b3;
@@ -34,17 +30,8 @@ class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeList
 	{
 		sCanvas = cp;
  		myRules = sCanvas.branch_rules;
- 		//myRules.color_warp = 0;
 		setLayout(new GridLayout(0,1));
- 		//setLayout(new GridBagLayout());
 
-
-		//setLayout(new BorderLayout());
-//		String name;
-// 		if (branch_number == 0) {
-// 			name = "trunk";
-// 		}
-// 		else {name = "branch";}
  		
 		b1 = new JButton("branch");
 		b1.setActionCommand("switch_branch");
@@ -109,8 +96,8 @@ class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeList
 		sliders.setLayout(new GridLayout(0,1));
 		start_size_slider = makeSlider(sliders, "size", 10, 500, 100, false);
 		min_size_slider = makeSlider(sliders, "intricacy - low values my cause lag", 5, 100, 10, false);
-		size_slider = makeSlider(sliders, "internode ratio", 10, 95, 80, true);
-		size_warp_slider = makeSlider(sliders, "internode variation", 0, 50, 15, true);
+		size_slider = makeSlider(sliders, "node ratio", 10, 95, 80, true);
+		size_warp_slider = makeSlider(sliders, "node variation", 0, 50, 15, true);
 		angle_slider = makeSlider(sliders, "axil", 0, 180, 30, true);
 		angle_warp_slider = makeSlider(sliders, "axil variation", 0, 90, 10, true);
 		
@@ -133,12 +120,8 @@ class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeList
 
 		JPanel p = new JPanel();
 		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-		//p.setLayout(new GridLayout());
 		JLabel lab = new JLabel(label+ ": " +start);
 		lab.setAlignmentX( CENTER_ALIGNMENT);
-		//JLabel num = new JLabel(label + ": " +start);
-		lab.setAlignmentX( CENTER_ALIGNMENT);
-		//lab.setAlignmentY(TOP_ALIGNMENT);
 		p.add(lab);
 		//p.add(mySlider);
 		JPanel p1 = new JPanel();
@@ -146,7 +129,6 @@ class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeList
 		p1.add(mySlider);
 		
 		if (advancedMode && two) {
-			//JPanel p1 = new JPanel();
 			JSlider slider= new JSlider(JSlider.HORIZONTAL,min,max,start);
 			slider.addChangeListener(this);
 			slider.setMajorTickSpacing(max-min);
@@ -190,32 +172,21 @@ class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeList
  	
  	private double getAngle(JPanel sliders, int i) {
  		Component comps[] = sliders.getComponents();
- 		//double[] ar = new double[comps.length];
-// 		for (int i = 0; i< comps.length; i++) {
+
  		JSlider slider = (JSlider)comps[i];
  		return Math.toRadians((double)slider.getValue());
-// 		}
- 		//return ar;
  	}
  	
  	private double getDouble(JPanel sliders, int i) {
  		Component comps[] = sliders.getComponents();
- 		//double[] ar = new double[comps.length];
- 		//for (int i = 0; i< comps.length; i++) {
  		JSlider slider = (JSlider)comps[i];
  		return (double)slider.getValue()/100;
- 		//}
- 		//return ar;
  	}
  	
  	private int getInt(JPanel sliders, int i) {
  		Component comps[] = sliders.getComponents();
- 		//int[] ar = new int[comps.length];
- 		//for (int i = 0; i< comps.length; i++) {
  		JSlider slider = (JSlider)comps[i];
  		return (int)slider.getValue();
- 		//}
- 		//return ar;
  	}
  	
  	private void updateRule(TreeData3D data, int i) {
@@ -275,7 +246,6 @@ class TreeWorldControlPanel extends JPanel implements ActionListener, ChangeList
  	
  	private void updateSliders() {
  		auto_updating = true;
- 		//sCanvas.setRootSize(getDouble(start_size_slider, 0));
  		((JSlider)(start_size_slider.getComponents()[0])).setValue((int)(sCanvas.controlSize*100));
  		updateInt(min_size_slider, 0, myRules.min_size);
  		updateSliderSet(myRules, 0);
@@ -320,20 +290,8 @@ public void actionPerformed(ActionEvent e) {
  	   if ("switch_branch".equals(e.getActionCommand())) {
  		   branch_number = (branch_number+1)%2;
  		   updateButtons();
-// 	 		if (branch_number == 0) {
-// 	 			b1.setText("trunk");
-// 	 			b2.setText("default trunk");
-// 	 			//b5.setText("root");
-// 	 			myRules = sCanvas.trunk_rules;
-// 	 		}
-// 	 		else {
-// 	 			b1.setText("branch");
-// 	 			b2.setText("default branch");
-// 	 			myRules = sCanvas.branch_rules;}
  	   }
  	   else if ("switch_end".equals(e.getActionCommand())) {
- 		   //end_number = (end_number+1)%2;
- 		   //updateButtons();
  		   advancedMode = !advancedMode;
  		   sCanvas.setMode(advancedMode);
  		   if (advancedMode) {
@@ -346,28 +304,6 @@ public void actionPerformed(ActionEvent e) {
  		   System.out.println("advanced mode is: " + advancedMode);
  		   drawSliders();
  		   revalidate();
-// 	 		if (end_number == 0) {
-// 	 			b5.setText("root");
-// 	 			if (branch_number == 0){
-// 	 				b2.setText("default trunk");
-// 	 	 			myRules = sCanvas.trunk_rules;
-// 	 			}
-// 	 			else {
-// 	 				b2.setText("default branch");
-// 	 	 			myRules = sCanvas.branch_rules;
-// 	 			}
-// 	 		}
-// 	 		else {
-// 	 			b5.setText("leaves");
-// 	 			if (branch_number == 0){
-// 	 				b2.setText("reset trunk tip");
-// 	 	 			myRules = sCanvas.trunk_tip_rules;
-// 	 			}
-// 	 			else {
-// 	 				b2.setText("reset branch tip");
-// 	 	 			myRules = sCanvas.branch_tip_rules;
-// 	 			}
-// 	 			b5.setText("leaves");}
  	   }
  	   else if ("reset".equals(e.getActionCommand())){
  		   if (branch_number == 0) {
@@ -390,7 +326,6 @@ public void actionPerformed(ActionEvent e) {
  		   updateButtons();
  	   }
  	   else if ("photo".equals(e.getActionCommand())) {
- 		   //System.out.println("you clicked on photo!");
  		   sCanvas.saveToGIF();
  	   }
  		updateSliders();

@@ -9,7 +9,6 @@
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageOutputStream;
-import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
 
@@ -18,19 +17,16 @@ import libraries.GifSequenceWriter;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.TimerTask;
 import java.util.Timer;
 
 
-//stores the rules for generating the tree and its components
+//stores the tree's generation rules, generates and draws tree
 
 public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 {
@@ -76,10 +72,8 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 		activeBranches.clear();
     	double average_size = (trunk_rules.size+branch_rules.size)/2;
     	rootSize = 120/average_size*controlSize;
-		//tree = new TreeBranch(0, 0, 100.0/average_size, -Math.PI/2);
     	tree = new TreeBranch3D(0, -100, 0, rootSize, rootColor);
 		activeBranches.add(tree);
-		//rotation = 0;
 		setTimer();
     }
     
@@ -93,7 +87,6 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     }
     
     private boolean step(){
-    	//System.out.println("...");
     	ArrayList<TreeBranch3D> newBranches = new ArrayList<TreeBranch3D>();
     	ArrayList<TreeBranch3D> deadBranches = new ArrayList<TreeBranch3D>();
     	for (TreeBranch3D branch: activeBranches) {
@@ -133,11 +126,8 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     
     public void setMode(boolean rules) {
     	enable_tip_rules = rules;
-//    	if (enable_tip_rules = false) {
-    		branch_tip_rules = branch_rules;
-    		trunk_tip_rules = trunk_rules;
-//    	}
-
+		branch_tip_rules = branch_rules;
+		trunk_tip_rules = trunk_rules;
     }
    
     public void setRules(TreeData3D rules, int branch_number){

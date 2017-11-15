@@ -1,6 +1,7 @@
 //this class stores the rules used to generate a particular tree.
 
 
+import java.awt.Color;
 import java.util.Random;
 
 public class TreeData3D {
@@ -92,21 +93,40 @@ public class TreeData3D {
 		return sets;
 	}
 	
-    private double wiggleAngle(double value, double level) {
+    public static double wiggleAngle(double value, double level) {
     	return (value + (rand.nextDouble()-.5)*level);//%(Math.PI/2);
     }
 	
-    private double wiggle(double value, double level) {
+    public static double wiggle(double value, double level) {
     	return value + (rand.nextDouble()-.5)*level;
     }
+    
+    public static Color wiggleColor(Color color, int level){
+        int shake = level*2+1;
+        
+        int[] rgb = new int[] {color.getRed(), color.getGreen(), color.getBlue()};
+        //extra green and yellow
+        rgb[1]+=level;
+        rgb[0]+=level;
+        for (int i = 0; i<3; i++){
+              int new_color = rgb[i]+rand.nextInt(shake)-level;
+              if (new_color < 0){
+                 new_color = 0;
+              }
+              else if (new_color >255){
+                 new_color = 255;
+              }
+              rgb[i] = new_color;
+        }
+        color = new Color(rgb[0], rgb[1], rgb[2]);
+        return color;
+      }
 	
 	
 	public RotationMatrix getMatrix() {
 		RotationMatrix matrix = new RotationMatrix(3,3);
 		RotationMatrix y_rotate = RotationMatrix.rotateY(wiggle(whorl, whorl_warp));
 		RotationMatrix z_rotate = RotationMatrix.rotateX(wiggle(angle, angle_warp));
-		//System.out.
-		//x_rotate.print();
 		return matrix.multiply(y_rotate).multiply(z_rotate);
 		
 	}
@@ -126,7 +146,6 @@ public class TreeData3D {
 		d.whorl_warp = lerp(d1.whorl_warp, d2.whorl_warp, ratio);
 		
 		d.color_warp = (int)(d1.color_warp*(1-ratio) + d2.color_warp*ratio);
-		//d.min_size = (int)(d1.min_size*(1-ratio) + d2.min_size*ratio);
 		d.min_size = d2.min_size;
     	return d;
     	

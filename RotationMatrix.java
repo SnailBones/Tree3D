@@ -106,19 +106,6 @@ public class RotationMatrix
 		return this;
 	}
 	public RotationMatrix multiply(RotationMatrix other) {
-		//int size = Math.min(rows(), columns());
-//		double[][] product = new double[rows()][other.columns()];
-//    	for (int i = 0; i < array.length; i++) {
-//    		for (int j = 0; j < array[0].length; j++) {
-//    			double num = 0;
-//    	    	for (int k = 0; k < array.length; k++) {
-//	    			num += array[i][k] * other.array[k][j];
-//	    		}
-//    	    	product[i][j] = num;
-//    	    	
-//    		}
-//    	}
-//    	Matrix matrix = new Matrix(product);
 		return new RotationMatrix(multiply(other.array));
 	}
 	
@@ -214,49 +201,8 @@ public class RotationMatrix
 		return m;
 	}
 	
-//	public double[] getQuaternion() {
-//		double m00 = array[0][0];
-//		double m01 = array[0][1];
-//		double m02 = array[0][2];
-//		double m10 = array[1][0];
-//		double m11 = array[1][1];
-//		double m12 = array[1][2];
-//		double m20 = array[2][0];
-//		double m21 = array[2][1];
-//		double m22 = array[2][2];
-//		double tr = m00 + m11 + m22;
-//		double qw, qx, qy, qz;
-//		if (tr > 0) { 
-//		  double S = Math.sqrt(tr+1.0) * 2; // S=4*qw 
-//		  qw = 0.25 * S;
-//		  qx = (m21 - m12) / S;
-//		  qy = (m02 - m20) / S; 
-//		  qz = (m10 - m01) / S; 
-//		} else if ((m00 > m11)&(m00 > m22)) { 
-//		  double S = Math.sqrt(1.0 + m00 - m11 - m22) * 2; // S=4*qx 
-//		  qw = (m21 - m12) / S;
-//		  qx = 0.25 * S;
-//		  qy = (m01 + m10) / S; 
-//		  qz = (m02 + m20) / S; 
-//		} else if (m11 > m22) { 
-//		  double S = Math.sqrt(1.0 + m11 - m00 - m22) * 2; // S=4*qy
-//		  qw = (m02 - m20) / S;
-//		  qx = (m01 + m10) / S; 
-//		  qy = 0.25 * S;
-//		  qz = (m12 + m21) / S; 
-//		} else { 
-//		  double S = Math.sqrt(1.0 + m22 - m00 - m11) * 2; // S=4*qz
-//		  qw = (m10 - m01) / S;
-//		  qx = (m02 + m20) / S;
-//		  qy = (m12 + m21) / S;
-//		  qz = 0.25 * S;
-//		}
-//		return new double[] {qw, qx, qy, qz};
-//	}
     public static RotationMatrix rotateToward(Point3D start, Point3D destination, double amount) {
-    	//Point3D perp = crossProduct(destination, this);
     	Point3D perp = Point3D.crossProduct(start, destination);
-    	//perp.printPoint();
     	double distance = Point3D.angleBetween(start, destination);
     	if (distance == 0){
     		return new RotationMatrix();
@@ -264,11 +210,7 @@ public class RotationMatrix
     	else if (distance >= Math.PI){
     		perp = new Point3D(0,0, 1);
     	}
-    	//RotationMatrix zam = RotationMatrix.rotateAxis(perp, amount*distance);
-    	RotationMatrix rm = RotationMatrix.rotateAxis(perp, amount*distance);
-    	//Point3D twist = zam.multiply(this);
-    	//Point3D twist = new Point3D(x*(1-amount)+destination.x*amount, y*(1-amount)+destination.y*amount, z*(1-amount)+destination.z*amount);
-    	
+    	RotationMatrix rm = RotationMatrix.rotateAxis(perp, amount*distance); 	
     	return rm;
     }
 }

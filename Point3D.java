@@ -154,10 +154,5 @@ public class Point3D {
     public void printPoint() {
     	System.out.println("{ x: " + x + ", y: " + y + ", z: " + z + " }"); 
     }
-
-//	public void translate(double angle) {
-//		x = x + angle;
-//		y = y - angle;
-//	}
     
 }

@@ -38,6 +38,6 @@ public class TreeDraw3D
 		myFrame.setResizable(true);
 		myFrame.setVisible(true);
     }
-} // BasicDraw
+}
 
 
