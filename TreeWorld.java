@@ -86,47 +86,49 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
     
     private class MyTimerTask extends TimerTask {
         public void run() {
-            step();
+            if (!step()) {	//step until tree is grown
+        		cancel();
+            }
         }
     }
     
-    private void step(){
+    private boolean step(){
     	//System.out.println("...");
     	ArrayList<TreeBranch3D> newBranches = new ArrayList<TreeBranch3D>();
     	ArrayList<TreeBranch3D> deadBranches = new ArrayList<TreeBranch3D>();
     	for (TreeBranch3D branch: activeBranches) {
-    		TreeBranch3D baby_trunk;
-    		TreeBranch3D baby_branch;
-    		if (enable_tip_rules) {
-        		double size = branch.size/rootSize;
-        		baby_trunk = branch.makeBaby(TreeData3D.blend(trunk_tip_rules, trunk_rules, size), goal);
-        		baby_branch = branch.makeBaby(TreeData3D.blend(branch_tip_rules, branch_rules, size), goal);
+    		if (branch.grow(10)){
+        		TreeBranch3D baby_trunk;
+        		TreeBranch3D baby_branch;
+	    		if (enable_tip_rules) {
+	        		double size = branch.size/rootSize;
+	        		baby_trunk = branch.makeBaby(TreeData3D.blend(trunk_tip_rules, trunk_rules, size), goal);
+	        		baby_branch = branch.makeBaby(TreeData3D.blend(branch_tip_rules, branch_rules, size), goal);
+	    		}
+	    		else {	//use root rules for whole tree
+	          		baby_trunk = branch.makeBaby(trunk_rules, goal);
+	        		baby_branch = branch.makeBaby(branch_rules, goal);
+	    			
+	    		}
+	    		if (baby_trunk != null) {
+	    			newBranches.add(baby_trunk);
+	    		}
+	    		if (baby_branch != null) {
+	    			newBranches.add(baby_branch);
+	    		}
+	    		deadBranches.add(branch);
     		}
-    		else {	//use root rules for whole tree
-          		baby_trunk = branch.makeBaby(trunk_rules, goal);
-        		baby_branch = branch.makeBaby(branch_rules, goal);
-    			
-    		}
-    		if (baby_trunk != null) {
-    			newBranches.add(baby_trunk);
-    		}
-    		if (baby_branch != null) {
-    			newBranches.add(baby_branch);
-    		}
-    		deadBranches.add(branch);
     	}
-    	//System.out.println(newBranches);
-//    	if (!activeBranches.isEmpty() && !deadBranches.isEmpty()) {
-//    		activeBranches.removeAll(deadBranches);
-//    	}
     	for (TreeBranch3D branch : deadBranches) {
     		activeBranches.remove(branch);
     	}
     	activeBranches.addAll(newBranches);
-    	if (activeBranches.isEmpty()) {
-    		task.cancel();
-    	}
     	repaint();
+    	if (activeBranches.isEmpty()) {
+    		return false;
+    	}
+    	return true;
+
     }
     
     public void setMode(boolean rules) {
@@ -194,6 +196,57 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 		 timer.scheduleAtFixedRate(task, 0, 50);
     }
 	
+	public void growGIF(){
+		double rotate = Math.PI/60;
+		int end_frames = 20;
+		String name = "grow_tree";
+		File saveFile;
+	    int n = 0;
+    	do {
+    		n++;
+    		saveFile = new File(name + "_" + n +".gif");
+    	}
+    	while (saveFile.exists());
+		System.out.println("saving  growth as: " + saveFile.getAbsolutePath());
+	  try{
+
+		 FileImageOutputStream outputstream = new FileImageOutputStream(saveFile);
+
+	    GifSequenceWriter writer = new GifSequenceWriter( outputstream, BufferedImage.TYPE_INT_RGB, 1, true);
+		startTree();
+		task.cancel();
+		int i = 0;
+	    while (step()) {
+	    	rotate(rotate);
+	    	BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+	  	    Graphics g = image.getGraphics();
+	  	    printAll(g);
+	  	    writer.writeToSequence(image);
+	  	    i++;
+	    	System.out.print(i + "-");
+	    }
+	    System.out.println();
+	    for (int a = 0; a < end_frames; a++) {
+	    	rotate(Math.PI*2/120);
+	    	BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+	  	    Graphics g = image.getGraphics();
+	  	    printAll(g);
+	  	    writer.writeToSequence(image);
+	  	    i++;
+	    	System.out.print(i + "-");
+	    }
+	    writer.close();
+	    outputstream.close();
+	    System.out.println();
+		System.out.println("saved to gif: " + saveFile.getAbsolutePath());
+	  }
+	  catch(Exception e){
+		  System.out.println("Oops!");
+		  e.printStackTrace();
+	  }
+
+}
+    
 	public void saveToGIF(){
 			String name = "tree";
 			File saveFile;
@@ -208,7 +261,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 
 			 FileImageOutputStream outputstream = new FileImageOutputStream(saveFile);
 
-		    GifSequenceWriter writer = new GifSequenceWriter( outputstream, BufferedImage.TYPE_INT_RGB, 10, true);
+		    GifSequenceWriter writer = new GifSequenceWriter( outputstream, BufferedImage.TYPE_INT_RGB, 1, true);
     	    for (int i = 0; i < 60; i++) {
     	    	rotate(Math.PI*2/60);
     	    	BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
@@ -282,10 +335,8 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 	public Point3D getWorldCoordinates(int xxx, int yyy) {
 		double x = -(double)xxx+getWidth()/2;
 		double y= (double)yyy-getHeight();;
-		System.out.println("2d coords: x:" + x + " y: " + y);
 		Point3D point = new Point3D(x, y, 0);
 		point = TreeBranch3D.rotateAroundY(point, Math.sin(-rotation), Math.cos(-rotation));
-		System.out.println("rotation is: " + rotation);
 		point.printPoint();
 		return point;
 	}
@@ -293,7 +344,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 	@Override
 	 public void mouseDragged(MouseEvent e) {
 		goal = getWorldCoordinates(e.getX(), e.getY()); 
-		rotate(.01);
+		//rotate(.01);
 	 }
 
 	@Override
@@ -313,6 +364,9 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 	            break;
 	        case KeyEvent.VK_SPACE :
 	        	saveImage("my_tree");
+	        	break;
+	        case KeyEvent.VK_G :
+	        	growGIF();
 	        	break;
 	     }
 		

@@ -13,10 +13,12 @@ The branch and the trunk each follow their own rules for growth, and can be sele
 - node ratio: size of next node (relative to this node).
 - axil: angle of next node from the previous node.
 - whorl: radial distance of consecutive nodes around the stem.
-- levity: direction of growth toward or away from a 'light source.' click to move the light.
+- levity: direction of growth toward or away from a 'light source.' click and drag to move the light.
 - gaiety: increase in coloration
+
+In advanced mode, each branch/trunk uses an additional rule set: as branches near the tip of the tree, they approach the new rules.
 
 That's all! In combination, these simple rules can create surprising effects.
 
-![tree7](examples/tree_7.gif?raw=true)
-![tree7](examples/tree_5.gif?raw=true)  
+![tree](examples/tree_5.gif?raw=true)  
+![tree](examples/grow_tree_4.gif?raw=true)  

@@ -14,6 +14,7 @@ public class TreeBranch3D {
 	//double angle;//angle from up to down to up again. latitude.
 	//double direction = 0; // angle around branch vector. longitude.
 	RotationMatrix rotation;
+	double growth_size = 0;
 	double size;
 	Point3D tip;
 	//boolean side = false;
@@ -51,7 +52,7 @@ public class TreeBranch3D {
 //		//rotation = new RotationMatrix(3,3);
 //		return rotation;
 //	}
-	public void rotateTip(Point3D goal, double levity) {
+	public Point3D rotateTip(Point3D goal, double levity) {
 		//levity = .5;
 		if (levity > 0){
 			Point3D tip = new Point3D(0, -size, 0);
@@ -60,7 +61,7 @@ public class TreeBranch3D {
 			//rotation = rotation.multiply(followLight);
 			rotation = followLight.multiply(rotation);
 			Point3D ltip = rotation.multiply(tip);
-			this.tip = ltip;
+			return ltip;
 		}
 		else if (levity < 0) {
 			Point3D tip = new Point3D(0, -size, 0);
@@ -70,13 +71,18 @@ public class TreeBranch3D {
 			//rotation = rotation.multiply(followLight);
 			rotation = followLight.multiply(rotation);
 			Point3D ltip = rotation.multiply(tip);
-			this.tip = ltip;
+			return ltip;
 		}
 		else {
 			Point3D tip = new Point3D(0, -size, 0);
 			Point3D ltip = rotation.multiply(tip);
-			this.tip = ltip;
+			return ltip;
 		}
+	}
+	
+	public Point3D getGrowTip(double size) {//get tip while it's growing
+		Point3D ltip = rotation.multiply(new Point3D(0, -size, 0));
+		return ltip;
 	}
 	
 	public Point3D getTip() {
@@ -109,7 +115,7 @@ public class TreeBranch3D {
 	
 	public void drawMe(Graphics2D g2d, double sin_a, double cos_a, double lastSize) {
 		double space_color = .3;
-		Point3D tip=getTip();
+		Point3D tip=getGrowTip(growth_size).add(root);
 		Point3D r_tip = rotateAroundY(tip, sin_a, cos_a);
 		Point3D r_root = rotateAroundY(root, sin_a, cos_a);
 		int place_in_space = (int)((r_tip.z+r_root.z)/2*space_color);
@@ -155,10 +161,19 @@ public class TreeBranch3D {
 		RotationMatrix new_rotation = rotation.multiply(rules.getMatrix());
 		
 		TreeBranch3D baby = new TreeBranch3D(getTip(), size, new_rotation,  wiggleColor(color, rules.color_warp));
-		baby.rotateTip(goal, rules.grow_lean);
+		baby.tip = baby.rotateTip(goal, rules.grow_lean);
 		babies.add(baby);
 
 		return baby;
+	}
+	
+	public boolean grow(double g_s) {
+		growth_size += g_s;
+		if (growth_size>size) {
+			growth_size = size;
+			return true;
+		}
+		return false;
 	}
 
 	double addAngle(double angle, double amount){
