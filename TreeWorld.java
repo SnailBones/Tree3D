@@ -208,7 +208,7 @@ public class TreeWorld extends JPanel implements MouseInputListener, KeyListener
 
 			 FileImageOutputStream outputstream = new FileImageOutputStream(saveFile);
 
-		    GifSequenceWriter writer = new GifSequenceWriter( outputstream, BufferedImage.TYPE_INT_RGB, 1, true);
+		    GifSequenceWriter writer = new GifSequenceWriter( outputstream, BufferedImage.TYPE_INT_RGB, 10, true);
     	    for (int i = 0; i < 60; i++) {
     	    	rotate(Math.PI*2/60);
     	    	BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
