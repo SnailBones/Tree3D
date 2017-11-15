@@ -186,9 +186,7 @@ public class RotationMatrix
 	}
 	//converts to unit vector and rotates on a custom axis
 	public static RotationMatrix rotateAxis(Point3D axis, double pheta) {
-		//System.out.println("length is " + axis.getLength());
 		axis.normalize();
-		//System.out.println("length is " + axis.getLength());
 		double s = Math.sin(pheta);
 		double c = Math.cos(pheta);
 		double x = axis.getX();
