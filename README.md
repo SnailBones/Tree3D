@@ -1,5 +1,4 @@
 ![tree](examples/grow_tree_4.gif?raw=true)  
-![tree](examples/tree0.gif?raw=true)
 
 # Tree3D
 
@@ -20,5 +19,6 @@ In advanced mode, each branch/trunk uses an additional rule set: as branches nea
 
 That's all! In combination, these simple rules can create surprising effects.
 
+![tree](examples/tree0.gif?raw=true)
 ![tree](examples/tree1.gif?raw=true)
 ![tree](examples/tree_5.gif?raw=true) 
